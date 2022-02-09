@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chatrom</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+        integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+
+<body>
+
+    <div class="col-md-6 offset-md-3 col-sm-12 text-center" style="width: 600px; margin: auto; margin-top: 20vh;">
+        <h1> <span id="chatname"></span> chatroom <i class="fas fa-smile"></i></h1>
+        <div id="status"></div>
+        <div id="chat">
+            <br>
+            <div class="card" style="height: 500px; overflow: auto;">
+                <div id="messages" class="card-block">
+                </div>
+            </div>
+            <textarea id="message" class="form-control" placeholder="Enter message..."></textarea>
+            <div class="text-center">
+                <button id="send" class="bg-white p-1" style="width: 30%; margin-top: 10px; display:inline-block"><i
+                        class="fas fa-paper-plane"></i> Send</button>
+                <a href="index.html" class="bg-danger p-1 text-white"
+                    style="width: 30%; margin-top: 10px; border-radius: 50px;">&nbsp;Leave&nbsp;</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        let paremeters = new URLSearchParams(location.search)
+        let username = paremeters.get('username')
+        let roomname = paremeters.get('room')
+        document.getElementById("chatname").innerHTML = roomname
+        const date = new Date()
+        function getMessages() { $.get('http://localhost:3000/messages', (data) => { data.forEach(addMessages) }) }
+        function sendMessage(message) { $.post('http://localhost:3000/messages', message) }
+        function addMessages(message) {
+            $("#messages").append
+                (`<div style="font-weight: bolder; font-size: 15px;"><i class="fas fa-users"></i>
+                <span style="background-color: blue; color: white; border-radius: 50px; padding: 10px;">${message.from_user}</span> @ ${message.date_sent}</div>
+                <p class="mt-1 bg-light text-black" style="font-family: sans-serif; border-radius: 50px; display: inline-block;"><i class="fas fa-comments"></i> ${message.message}</p>`)
+        }
+        let socket = io()
+        socket.on("connect", () => { })
+        $(() => {
+            $("#send").click(() => {
+                var dateTime = `${date.getHours()}:${date.getMinutes()} on ${date.getMonth() + 1}•${date.getDate()}•${date.getFullYear()}`
+                sendMessage({
+                    from_user: username,
+                    to_user: 'all',
+                    room: roomname,
+                    message: $("#message").payload(),
+                    date_sent: dateTime
+                })
+                $("#message").payload("")
+            })
+            getMessages()
+        })
+        socket.on('message', addMessages)
+        window.addEventListener('keydown', (e) => {
+            if (e.keyCode === 13) {
+                e.preventDefault()
+                $('#send').click()
+            }
+        })
+    </script>
+
+
+    <script type='text/javascript' src=''></script>
+    <script type='text/javascript' src=''></script>
+    <script type='text/Javascript'></script>
+    <script type='text/javascript'
+        src='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js'></script>
+</body>
+
+<body>
+
+</body>
+
+</html>
